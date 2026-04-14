@@ -26,3 +26,4 @@ venv/
 bin/
 obj/
 .vs/
+.vscode/
