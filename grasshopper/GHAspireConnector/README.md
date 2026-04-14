@@ -16,6 +16,7 @@ Mover a un plugin mantenible la logica que en Python seria dificil de escalar:
 - `Read Tool Catalog`: lee [tools/grasshopper_tool_catalog.json](../../tools/grasshopper_tool_catalog.json).
 - `Create Operation JSON`: genera el JSON de una operacion.
 - `Create Job JSON`: empaqueta material, defaults y operaciones en el job final.
+- `Write Text File`: escribe un JSON o texto a disco para pruebas de flujo.
 
 ## Build local
 
@@ -37,6 +38,14 @@ dotnet sln grasshopper/GHAspireConnector.slnx list
 ```
 
 El ensamblado se genera con extension `.gha`.
+
+## Prueba intermedia recomendada
+
+1. Usar `Read Tool Catalog` para leer el catalogo.
+2. Elegir un selector de herramienta.
+3. Generar una o varias operaciones con `Create Operation JSON`.
+4. Empaquetarlas con `Create Job JSON`.
+5. Escribir el resultado con `Write Text File` a un `.json`.
 
 ## Siguiente paso recomendado
 
