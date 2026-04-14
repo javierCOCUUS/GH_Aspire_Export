@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using Grasshopper.Kernel;
+using GHAspireConnector.Models;
 using Rhino.Geometry;
 
 namespace GHAspireConnector.Components;
@@ -90,36 +91,40 @@ public sealed class BuildDrillPreviewComponent : ReadableParamsComponentBase
             return;
         }
 
-        var topZ = -startDepth;
-        var targetZ = -(startDepth + cutDepth);
         var rapidCurves = new List<Curve>();
         var approachCurves = new List<Curve>();
         var plungeCurves = new List<Curve>();
         var retractCurves = new List<Curve>();
 
-        Point3d? previousSafePoint = null;
-        foreach (var drillPoint in drillPoints)
+        DrillPathResult drillPath;
+        try
         {
-            var safePoint = new Point3d(drillPoint.X, drillPoint.Y, safeZ);
-            var approachPoint = new Point3d(drillPoint.X, drillPoint.Y, approachZ);
-            var topPoint = new Point3d(drillPoint.X, drillPoint.Y, topZ);
-            var bottomPoint = new Point3d(drillPoint.X, drillPoint.Y, targetZ);
+            drillPath = DrillPathBuilder.Build(drillPoints, toolEntry, startDepth, cutDepth, safeZ, approachZ);
+        }
+        catch (Exception ex)
+        {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
+            return;
+        }
 
+        Point3d? previousSafePoint = null;
+        foreach (var hole in drillPath.Holes)
+        {
             if (previousSafePoint.HasValue)
             {
-                rapidCurves.Add(new LineCurve(previousSafePoint.Value, safePoint));
+                rapidCurves.Add(new LineCurve(previousSafePoint.Value, hole.SafePoint));
             }
 
-            if (Math.Abs(safeZ - approachZ) > Rhino.RhinoMath.ZeroTolerance)
+            if (Math.Abs(drillPath.SafeZ - drillPath.ApproachZ) > Rhino.RhinoMath.ZeroTolerance)
             {
-                approachCurves.Add(new LineCurve(safePoint, approachPoint));
+                approachCurves.Add(new LineCurve(hole.SafePoint, hole.ApproachPoint));
             }
 
-            var plungeStart = Math.Abs(approachZ - topZ) > Rhino.RhinoMath.ZeroTolerance ? approachPoint : topPoint;
-            plungeCurves.Add(new LineCurve(plungeStart, bottomPoint));
-            retractCurves.Add(new LineCurve(bottomPoint, safePoint));
+            var plungeStart = Math.Abs(drillPath.ApproachZ + drillPath.StartDepth) > Rhino.RhinoMath.ZeroTolerance ? hole.ApproachPoint : hole.TopPoint;
+            plungeCurves.Add(new LineCurve(plungeStart, hole.BottomPoint));
+            retractCurves.Add(new LineCurve(hole.BottomPoint, hole.SafePoint));
 
-            previousSafePoint = safePoint;
+            previousSafePoint = hole.SafePoint;
         }
 
         da.SetData(0, toolEntry.DisplayName);

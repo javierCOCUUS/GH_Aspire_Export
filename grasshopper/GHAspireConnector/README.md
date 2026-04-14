@@ -16,6 +16,7 @@ Mover a un plugin mantenible la logica que en Python seria dificil de escalar:
 - `Read Tool Catalog`: lee [tools/grasshopper_tool_catalog.json](../../tools/grasshopper_tool_catalog.json).
 - `Pick Tool`: selecciona una herramienta filtrada y devuelve el selector JSON.
 - `Build Drill Preview`: primera operacion CAM determinista con lectura de herramienta desde catalogo y salidas separadas para rapid, approach, plunge y retract.
+- `Postprocess Drill GCode`: genera G-code de drill leyendo un postprocesador real de Aspire.
 - `Create Operation JSON`: genera el JSON de una operacion.
 - `Create Job JSON`: empaqueta material, defaults y operaciones en el job final.
 - `Write Text File`: escribe un JSON o texto a disco para pruebas de flujo.
