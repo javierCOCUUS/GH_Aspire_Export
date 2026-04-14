@@ -14,23 +14,23 @@ public sealed class CreateJobJsonComponent : GH_Component
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddTextParameter("Job Name", "J", "Nombre del job.", GH_ParamAccess.item);
-        pManager.AddTextParameter("Units", "U", "Unidades del job, normalmente mm o in.", GH_ParamAccess.item, "mm");
-        pManager.AddNumberParameter("Thickness", "T", "Espesor del material.", GH_ParamAccess.item);
-        pManager.AddTextParameter("Origin", "O", "Origen XY, por ejemplo lower_left.", GH_ParamAccess.item, "lower_left");
-        pManager.AddTextParameter("Z Zero", "Z", "Referencia Z del material.", GH_ParamAccess.item, "material_top");
-        pManager.AddTextParameter("Profile Tool", "P", "Selector JSON por defecto para operaciones profile.", GH_ParamAccess.item, string.Empty);
+        pManager.AddTextParameter("Job Name", "Job Name", "Nombre del job.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Units", "Units", "Unidades del job, normalmente mm o in.", GH_ParamAccess.item, "mm");
+        pManager.AddNumberParameter("Thickness", "Thickness", "Espesor del material.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Origin", "Origin", "Origen XY, por ejemplo lower_left.", GH_ParamAccess.item, "lower_left");
+        pManager.AddTextParameter("Z Zero", "Z Zero", "Referencia Z del material.", GH_ParamAccess.item, "material_top");
+        pManager.AddTextParameter("Profile Tool", "Profile Tool", "Selector JSON por defecto para operaciones profile.", GH_ParamAccess.item, string.Empty);
         pManager[5].Optional = true;
-        pManager.AddTextParameter("Pocket Tool", "PK", "Selector JSON por defecto para operaciones pocket.", GH_ParamAccess.item, string.Empty);
+        pManager.AddTextParameter("Pocket Tool", "Pocket Tool", "Selector JSON por defecto para operaciones pocket.", GH_ParamAccess.item, string.Empty);
         pManager[6].Optional = true;
-        pManager.AddTextParameter("Drill Tool", "D", "Selector JSON por defecto para operaciones drill.", GH_ParamAccess.item, string.Empty);
+        pManager.AddTextParameter("Drill Tool", "Drill Tool", "Selector JSON por defecto para operaciones drill.", GH_ParamAccess.item, string.Empty);
         pManager[7].Optional = true;
-        pManager.AddTextParameter("Operations", "OPS", "Lista de operaciones JSON.", GH_ParamAccess.list);
+        pManager.AddTextParameter("Operations", "Operations", "Lista de operaciones JSON.", GH_ParamAccess.list);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
-        pManager.AddTextParameter("Job JSON", "JSON", "Job completo serializado como JSON.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Job JSON", "Job JSON", "Job completo serializado como JSON.", GH_ParamAccess.item);
     }
 
     protected override void SolveInstance(IGH_DataAccess da)

@@ -14,9 +14,14 @@ Mover a un plugin mantenible la logica que en Python seria dificil de escalar:
 ## Componentes iniciales
 
 - `Read Tool Catalog`: lee [tools/grasshopper_tool_catalog.json](../../tools/grasshopper_tool_catalog.json).
+- `Pick Tool`: selecciona una herramienta filtrada y devuelve el selector JSON.
 - `Create Operation JSON`: genera el JSON de una operacion.
 - `Create Job JSON`: empaqueta material, defaults y operaciones en el job final.
 - `Write Text File`: escribe un JSON o texto a disco para pruebas de flujo.
+
+## Legibilidad en Grasshopper
+
+Los nicknames de entradas y salidas se han igualado a nombres legibles para que en el canvas se vean palabras completas, no solo iniciales.
 
 ## Build local
 

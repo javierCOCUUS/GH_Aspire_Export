@@ -13,20 +13,20 @@ public sealed class CreateOperationComponent : GH_Component
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddTextParameter("Name", "N", "Nombre de la operacion.", GH_ParamAccess.item);
-        pManager.AddTextParameter("Layer", "L", "Nombre de la capa en el DXF.", GH_ParamAccess.item);
-        pManager.AddTextParameter("Type", "T", "Tipo de operacion: profile, pocket o drill.", GH_ParamAccess.item);
-        pManager.AddNumberParameter("Start Depth", "SD", "Profundidad inicial.", GH_ParamAccess.item, 0.0);
-        pManager.AddNumberParameter("Cut Depth", "CD", "Profundidad de corte.", GH_ParamAccess.item);
-        pManager.AddTextParameter("Side", "S", "Side para perfiles: inside u outside.", GH_ParamAccess.item, string.Empty);
+        pManager.AddTextParameter("Name", "Name", "Nombre de la operacion.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Layer", "Layer", "Nombre de la capa en el DXF.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Type", "Type", "Tipo de operacion: profile, pocket o drill.", GH_ParamAccess.item);
+        pManager.AddNumberParameter("Start Depth", "Start Depth", "Profundidad inicial.", GH_ParamAccess.item, 0.0);
+        pManager.AddNumberParameter("Cut Depth", "Cut Depth", "Profundidad de corte.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Side", "Side", "Side para perfiles: inside u outside.", GH_ParamAccess.item, string.Empty);
         pManager[5].Optional = true;
-        pManager.AddTextParameter("Tool Selector", "TS", "Selector JSON opcional para override de herramienta.", GH_ParamAccess.item, string.Empty);
+        pManager.AddTextParameter("Tool Selector", "Tool Selector", "Selector JSON opcional para override de herramienta.", GH_ParamAccess.item, string.Empty);
         pManager[6].Optional = true;
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
-        pManager.AddTextParameter("Operation JSON", "J", "Operacion serializada como JSON.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Operation JSON", "Operation JSON", "Operacion serializada como JSON.", GH_ParamAccess.item);
     }
 
     protected override void SolveInstance(IGH_DataAccess da)

@@ -16,17 +16,17 @@ public sealed class ReadToolCatalogComponent : GH_Component
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddTextParameter("Catalog Path", "P", "Ruta al archivo grasshopper_tool_catalog.json.", GH_ParamAccess.item);
-        pManager.AddTextParameter("Operation Type", "O", "Filtro opcional por tipo de operacion, por ejemplo profile, pocket o drill.", GH_ParamAccess.item, string.Empty);
+        pManager.AddTextParameter("Catalog Path", "Catalog Path", "Ruta al archivo grasshopper_tool_catalog.json.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Operation Type", "Operation Type", "Filtro opcional por tipo de operacion, por ejemplo profile, pocket o drill.", GH_ParamAccess.item, string.Empty);
         pManager[1].Optional = true;
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
-        pManager.AddTextParameter("Display Names", "N", "Nombres visibles de las herramientas filtradas.", GH_ParamAccess.list);
-        pManager.AddTextParameter("Ids", "I", "Ids de las herramientas filtradas.", GH_ParamAccess.list);
-        pManager.AddTextParameter("Selectors", "S", "Objetos selector JSON listos para exportar al job.", GH_ParamAccess.list);
-        pManager.AddTextParameter("Entries", "E", "Entradas completas del catalogo filtrado como JSON.", GH_ParamAccess.list);
+        pManager.AddTextParameter("Display Names", "Display Names", "Nombres visibles de las herramientas filtradas.", GH_ParamAccess.list);
+        pManager.AddTextParameter("Ids", "Ids", "Ids de las herramientas filtradas.", GH_ParamAccess.list);
+        pManager.AddTextParameter("Selectors", "Selectors", "Objetos selector JSON listos para exportar al job.", GH_ParamAccess.list);
+        pManager.AddTextParameter("Entries", "Entries", "Entradas completas del catalogo filtrado como JSON.", GH_ParamAccess.list);
     }
 
     protected override void SolveInstance(IGH_DataAccess da)

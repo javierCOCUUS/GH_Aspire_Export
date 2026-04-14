@@ -13,16 +13,16 @@ public sealed class WriteTextFileComponent : GH_Component
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-        pManager.AddTextParameter("Content", "C", "Contenido a escribir en el archivo.", GH_ParamAccess.item);
-        pManager.AddTextParameter("Path", "P", "Ruta completa del archivo de salida.", GH_ParamAccess.item);
-        pManager.AddBooleanParameter("Write", "W", "Si es true, escribe el archivo en disco.", GH_ParamAccess.item, false);
+        pManager.AddTextParameter("Content", "Content", "Contenido a escribir en el archivo.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Path", "Path", "Ruta completa del archivo de salida.", GH_ParamAccess.item);
+        pManager.AddBooleanParameter("Write", "Write", "Si es true, escribe el archivo en disco.", GH_ParamAccess.item, false);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
-        pManager.AddTextParameter("Path", "P", "Ruta del archivo de salida.", GH_ParamAccess.item);
-        pManager.AddBooleanParameter("Exists", "E", "Indica si el archivo existe tras la operacion.", GH_ParamAccess.item);
-        pManager.AddTextParameter("Status", "S", "Estado de la escritura.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Path", "Path", "Ruta del archivo de salida.", GH_ParamAccess.item);
+        pManager.AddBooleanParameter("Exists", "Exists", "Indica si el archivo existe tras la operacion.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Status", "Status", "Estado de la escritura.", GH_ParamAccess.item);
     }
 
     protected override void SolveInstance(IGH_DataAccess da)

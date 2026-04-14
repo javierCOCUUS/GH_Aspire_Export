@@ -87,6 +87,9 @@ td { padding: 6px 0; vertical-align: middle; }
 .path input { width: 100%; box-sizing: border-box; padding: 6px 8px; }
 .pick { width: 88px; text-align: right; }
 .pick input { width: 78px; }
+.actions { margin-top: 14px; display: flex; gap: 10px; align-items: center; }
+.actions input { min-width: 110px; padding: 6px 10px; }
+.status { margin-top: 12px; padding: 10px 12px; background: #f4f6f8; border: 1px solid #d7dce1; color: #334; font-size: 12px; }
 .hint { margin-top: 12px; font-size: 12px; color: #666; }
 </style>
 </head>
@@ -110,6 +113,10 @@ td { padding: 6px 0; vertical-align: middle; }
       <td class="pick"><input class="FilePicker" id="PickTools" name="PickTools" type="button" value="Elegir"></td>
     </tr>
   </table>
+  <div class="actions">
+    <input class="LuaButton" id="ValidateSelection" name="ValidateSelection" type="button" value="Validar">
+  </div>
+  <div class="status"><span id="ValidationStatus">Pendiente de validacion.</span></div>
   <div class="hint">Si el DXF se deja vacio se intentara usar el mismo nombre base que el JSON.</div>
 </body>
 </html>
@@ -151,6 +158,16 @@ local function read_all_text(path)
   return txt
 end
 
+local function write_all_text(path, txt)
+  local f = io.open(path, "w")
+  if f == nil then
+    return false
+  end
+  f:write(txt)
+  f:close()
+  return true
+end
+
 local function normalize_path(path)
   local s = trim(path)
   s = s:gsub("/", "\\")
@@ -180,6 +197,56 @@ end
 local function replace_extension(path, new_ext)
   local base = path:gsub("%.[^%.\\/:]+$", "")
   return base .. new_ext
+end
+
+local function escape_json_string(s)
+  local out = tostring(s or "")
+  out = out:gsub("\\", "\\\\")
+  out = out:gsub('"', '\\"')
+  out = out:gsub("\r", "\\r")
+  out = out:gsub("\n", "\\n")
+  out = out:gsub("\t", "\\t")
+  return out
+end
+
+local function encode_string_map(data)
+  local ordered_keys = { "json_path", "dxf_path", "tools_path" }
+  local lines = { "{" }
+
+  for i = 1, #ordered_keys do
+    local key = ordered_keys[i]
+    local suffix = i < #ordered_keys and "," or ""
+    table.insert(lines, '  "' .. key .. '": "' .. escape_json_string(data[key] or "") .. '"' .. suffix)
+  end
+
+  table.insert(lines, "}")
+  return table.concat(lines, "\n")
+end
+
+local function load_import_settings(path)
+  if not file_exists(path) then
+    return {}
+  end
+
+  local txt = read_all_text(path)
+  if txt == nil or txt == "" then
+    return {}
+  end
+
+  local data = nil
+  local ok, err = pcall(function()
+    data = decode_json(txt)
+  end)
+
+  if not ok or type(data) ~= "table" then
+    return {}
+  end
+
+  return data
+end
+
+local function save_import_settings(path, data)
+  return write_all_text(path, encode_string_map(data))
 end
 
 local function get_script_dir(script_path)
@@ -664,11 +731,110 @@ local function parse_tool_database(json_text)
   return raw
 end
 
+local function collect_dialog_selection(dialog)
+  local json_path = normalize_path(dialog:GetTextField("JsonPath"))
+  local dxf_path = normalize_path(dialog:GetTextField("DxfPath"))
+  local tools_path = normalize_path(dialog:GetTextField("ToolsPath"))
+
+  if dxf_path == "" and json_path ~= "" then
+    dxf_path = replace_extension(json_path, ".dxf")
+    dialog:UpdateTextField("DxfPath", dxf_path)
+  end
+
+  return {
+    json_path = json_path,
+    dxf_path = dxf_path,
+    tools_path = tools_path
+  }
+end
+
+local function validate_selected_inputs(selection)
+  if trim(selection.json_path) == "" then
+    return false, "Falta elegir el JSON del job."
+  end
+
+  if trim(selection.dxf_path) == "" then
+    return false, "Falta elegir el DXF de geometria."
+  end
+
+  if trim(selection.tools_path) == "" then
+    return false, "Falta elegir el catalogo de herramientas."
+  end
+
+  if not file_exists(selection.json_path) then
+    return false, "No existe el JSON: " .. tostring(selection.json_path)
+  end
+
+  if not file_exists(selection.dxf_path) then
+    return false, "No existe el DXF: " .. tostring(selection.dxf_path)
+  end
+
+  if not file_exists(selection.tools_path) then
+    return false, "No existe el catalogo de herramientas: " .. tostring(selection.tools_path)
+  end
+
+  local json_text = read_all_text(selection.json_path)
+  if json_text == nil or json_text == "" then
+    return false, "No se pudo leer el JSON del job."
+  end
+
+  local tools_text = read_all_text(selection.tools_path)
+  if tools_text == nil or tools_text == "" then
+    return false, "No se pudo leer el catalogo de herramientas."
+  end
+
+  local job_data = nil
+  local ok_job, err_job = pcall(function()
+    job_data = parse_job_json(json_text)
+  end)
+  if not ok_job then
+    return false, "JSON del job invalido: " .. tostring(err_job)
+  end
+
+  local tool_db = nil
+  local ok_tools, err_tools = pcall(function()
+    tool_db = parse_tool_database(tools_text)
+  end)
+  if not ok_tools then
+    return false, "JSON de herramientas invalido: " .. tostring(err_tools)
+  end
+
+  local op_count = 0
+  if type(job_data.operations) == "table" then
+    op_count = #job_data.operations
+  end
+
+  local tool_count = 0
+  if type(tool_db) == "table" then
+    tool_count = #tool_db
+  end
+
+  return true, "Validacion OK. Operaciones: " .. tostring(op_count) .. " | Herramientas: " .. tostring(tool_count)
+end
+
+local function update_validation_status(dialog, ok, text)
+  local prefix = ok and "OK: " or "ERROR: "
+  dialog:UpdateLabelField("ValidationStatus", prefix .. tostring(text))
+end
+
+function OnLuaButton_ValidateSelection(dialog)
+  local selection = collect_dialog_selection(dialog)
+  local ok, validation_message = validate_selected_inputs(selection)
+  update_validation_status(dialog, ok, validation_message)
+  return true
+end
+
+function OnFilePicker_PickJson(dialog)
+  collect_dialog_selection(dialog)
+  return true
+end
+
 local function choose_input_files(defaults)
-  local dialog = HTML_Dialog(true, IMPORT_DIALOG_HTML, 760, 230, "GH Aspire Import")
+  local dialog = HTML_Dialog(true, IMPORT_DIALOG_HTML, 760, 300, "GH Aspire Import")
   dialog:AddTextField("JsonPath", defaults.json_path or "")
   dialog:AddTextField("DxfPath", defaults.dxf_path or "")
   dialog:AddTextField("ToolsPath", defaults.tools_path or "")
+  dialog:AddLabelField("ValidationStatus", "Pendiente de validacion.")
   dialog:AddFilePicker(false, "PickJson", "JsonPath", true)
   dialog:AddFilePicker(false, "PickDxf", "DxfPath", true)
   dialog:AddFilePicker(false, "PickTools", "ToolsPath", true)
@@ -678,19 +844,7 @@ local function choose_input_files(defaults)
     return nil
   end
 
-  local json_path = normalize_path(dialog:GetTextField("JsonPath"))
-  local dxf_path = normalize_path(dialog:GetTextField("DxfPath"))
-  local tools_path = normalize_path(dialog:GetTextField("ToolsPath"))
-
-  if dxf_path == "" and json_path ~= "" then
-    dxf_path = replace_extension(json_path, ".dxf")
-  end
-
-  return {
-    json_path = json_path,
-    dxf_path = dxf_path,
-    tools_path = tools_path
-  }
+  return collect_dialog_selection(dialog)
 end
 
 local function clear_selection(job)
@@ -1056,11 +1210,13 @@ function main(script_path)
 
   local script_dir = get_script_dir(script_path)
   local repo_dir = dirname(script_dir)
+  local settings_path = join_path(script_dir, "GH_Aspire_importer.settings.json")
+  local remembered = load_import_settings(settings_path)
 
   local defaults = {
-    json_path = join_path(repo_dir, "samples\\pieza_001\\pieza_001.json"),
-    dxf_path = join_path(repo_dir, "samples\\pieza_001\\pieza_001.dxf"),
-    tools_path = join_path(repo_dir, "tools\\fetched_from_vtdb.json")
+    json_path = remembered.json_path or join_path(repo_dir, "samples\\pieza_001\\pieza_001.json"),
+    dxf_path = remembered.dxf_path or join_path(repo_dir, "samples\\pieza_001\\pieza_001.dxf"),
+    tools_path = remembered.tools_path or join_path(repo_dir, "tools\\fetched_from_vtdb.json")
   }
 
   local selected = choose_input_files(defaults)
@@ -1112,6 +1268,8 @@ function main(script_path)
     message("Error parseando JSON de herramientas:\n" .. tostring(err_tools))
     return false
   end
+
+  save_import_settings(settings_path, selected)
 
   local dxf_path = selected.dxf_path
 
