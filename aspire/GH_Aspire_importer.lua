@@ -194,6 +194,25 @@ local function join_path(base, child)
   return normalize_path(b .. "\\" .. child)
 end
 
+local function ensure_directory(path)
+  local dir = normalize_path(path)
+  if dir == "" then
+    return false
+  end
+
+  os.execute('mkdir "' .. dir .. '" >nul 2>nul')
+
+  local probe_path = join_path(dir, "__dir_probe__.tmp")
+  local probe = io.open(probe_path, "w")
+  if probe == nil then
+    return false
+  end
+
+  probe:close()
+  os.remove(probe_path)
+  return true
+end
+
 local function replace_extension(path, new_ext)
   local base = path:gsub("%.[^%.\\/:]+$", "")
   return base .. new_ext
@@ -246,6 +265,8 @@ local function load_import_settings(path)
 end
 
 local function save_import_settings(path, data)
+  local parent_dir = dirname(path)
+  ensure_directory(parent_dir)
   return write_all_text(path, encode_string_map(data))
 end
 
@@ -265,6 +286,18 @@ local function get_script_dir(script_path)
   end
 
   return p
+end
+
+local function get_settings_path(script_dir)
+  local appdata = normalize_path(os.getenv("APPDATA") or "")
+  if appdata ~= "" then
+    local settings_dir = join_path(appdata, "GH_Aspire_Export")
+    if ensure_directory(settings_dir) then
+      return join_path(settings_dir, "GH_Aspire_importer.settings.json")
+    end
+  end
+
+  return join_path(script_dir, "GH_Aspire_importer.settings.json")
 end
 
 local function skip_ws(text, idx)
@@ -1210,7 +1243,7 @@ function main(script_path)
 
   local script_dir = get_script_dir(script_path)
   local repo_dir = dirname(script_dir)
-  local settings_path = join_path(script_dir, "GH_Aspire_importer.settings.json")
+  local settings_path = get_settings_path(script_dir)
   local remembered = load_import_settings(settings_path)
 
   local defaults = {
