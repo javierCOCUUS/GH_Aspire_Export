@@ -8,7 +8,7 @@ public sealed class GHAspireConnectorInfo : GH_AssemblyInfo
 {
     public override string Name => "GH Aspire Connector";
 
-    public override Bitmap? Icon => null;
+    public override Bitmap? Icon => IconLoader.Load("json.png");
 
     public override string Description => "Componentes de Grasshopper para seleccionar herramientas y construir jobs JSON para Aspire.";
 

@@ -105,7 +105,7 @@ public sealed class CreateJobJsonComponent : ReadableParamsComponentBase
         da.SetData(0, JsonHelpers.ToPrettyJson(job));
     }
 
-    protected override System.Drawing.Bitmap? Icon => null;
+    protected override System.Drawing.Bitmap? Icon => IconLoader.Load("json.png");
 
     public override Guid ComponentGuid => new("3f09fa50-456e-4e4b-82f9-2ae65d41fd0f");
 }

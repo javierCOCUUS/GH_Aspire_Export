@@ -115,7 +115,7 @@ public sealed class PickToolComponent : ReadableParamsComponentBase
         da.SetData(3, JsonSerializer.Serialize(selected, JsonHelpers.PrettyOptions));
     }
 
-    protected override System.Drawing.Bitmap? Icon => null;
+    protected override System.Drawing.Bitmap? Icon => IconLoader.Load("opciones.png");
 
     public override Guid ComponentGuid => new("e4b595ef-1850-48be-b380-75f86d24f765");
 }

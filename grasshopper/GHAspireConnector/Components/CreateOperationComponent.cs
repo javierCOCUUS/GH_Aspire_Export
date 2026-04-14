@@ -78,7 +78,7 @@ public sealed class CreateOperationComponent : ReadableParamsComponentBase
         da.SetData(0, JsonHelpers.ToPrettyJson(operation));
     }
 
-    protected override System.Drawing.Bitmap? Icon => null;
+    protected override System.Drawing.Bitmap? Icon => IconLoader.Load("json.png");
 
     public override Guid ComponentGuid => new("547257ac-3229-4eb7-b3c0-f347175c0735");
 }

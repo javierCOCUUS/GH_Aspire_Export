@@ -36,6 +36,21 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="..\icons\catalogo.png">
+      <LogicalName>GHAspireConnector.Icons.catalogo.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\icons\json.png">
+      <LogicalName>GHAspireConnector.Icons.json.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\icons\opciones.png">
+      <LogicalName>GHAspireConnector.Icons.opciones.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\icons\write.png">
+      <LogicalName>GHAspireConnector.Icons.write.png</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
   <Target Name="ValidateRhinoReferences" BeforeTargets="ResolveReferences">
     <Error Condition="!Exists('$(RhinoCommonPath)')" Text="RhinoCommon.dll no encontrado en $(RhinoCommonPath)" />
     <Error Condition="!Exists('$(GrasshopperDllPath)')" Text="Grasshopper.dll no encontrado en $(GrasshopperDllPath)" />

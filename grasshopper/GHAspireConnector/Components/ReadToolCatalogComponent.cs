@@ -78,7 +78,7 @@ public sealed class ReadToolCatalogComponent : ReadableParamsComponentBase
         da.SetDataList(3, tools.Select(tool => JsonSerializer.Serialize(tool, JsonHelpers.PrettyOptions)));
     }
 
-    protected override System.Drawing.Bitmap? Icon => null;
+    protected override System.Drawing.Bitmap? Icon => IconLoader.Load("catalogo.png");
 
     public override Guid ComponentGuid => new("fe634d16-e426-4bc2-a12a-b4a372983f8a");
 }

@@ -73,7 +73,7 @@ public sealed class WriteTextFileComponent : ReadableParamsComponentBase
         da.SetData(2, status);
     }
 
-    protected override System.Drawing.Bitmap? Icon => null;
+    protected override System.Drawing.Bitmap? Icon => IconLoader.Load("write.png");
 
     public override Guid ComponentGuid => new("34e71f58-01b9-46d5-9878-bceb34abf9c2");
 }
