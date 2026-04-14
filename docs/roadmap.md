@@ -5,12 +5,14 @@
 - Consolidar el formato DXF + JSON exportado desde Grasshopper.
 - Versionar ejemplos minimos reproducibles.
 - Hacer reproducible la importacion en Aspire.
+- Separar scripts, ejemplos y definiciones por carpetas.
 
 ## Fase 2
 
 - Extraer configuracion de herramientas fuera del script Lua.
 - Leer parametros de herramienta desde una fuente comun.
 - Validar capas y operaciones antes de abrir Aspire.
+- Elegir archivos de entrada desde un dialogo en Aspire.
 
 ## Fase 3
 

@@ -13,21 +13,36 @@
       "type": "profile",
       "start_depth": 0.0,
       "cut_depth": 18.2,
-      "side": "inside"
+      "side": "inside",
+      "tool": {
+        "id": "g-g-0504af68-bb0f-4b1f-811f-46f94bbec767",
+        "tool_type": "end_mill",
+        "diameter_mm": 6.0
+      }
     },
     {
       "name": "POCKET",
       "layer": "POCKET",
       "type": "pocket",
       "start_depth": 0.0,
-      "cut_depth": 6.0
+      "cut_depth": 6.0,
+      "tool": {
+        "id": "g-g-0504af68-bb0f-4b1f-811f-46f94bbec767",
+        "tool_type": "end_mill",
+        "diameter_mm": 6.0
+      }
     },
     {
       "name": "DRILL",
       "layer": "DRILL",
       "type": "drill",
       "start_depth": 0.0,
-      "cut_depth": 12.0
+      "cut_depth": 12.0,
+      "tool": {
+        "id": "g-g-398e46b9-1726-47ff-b13e-282c8e51f37a",
+        "tool_type": "through_drill",
+        "diameter_mm": 5.0
+      }
     },
     {
       "name": "CUT_OUTSIDE",
@@ -35,7 +50,12 @@
       "type": "profile",
       "start_depth": 0.0,
       "cut_depth": 18.2,
-      "side": "outside"
+      "side": "outside",
+      "tool": {
+        "id": "g-g-0504af68-bb0f-4b1f-811f-46f94bbec767",
+        "tool_type": "end_mill",
+        "diameter_mm": 6.0
+      }
     }
   ]
 }
