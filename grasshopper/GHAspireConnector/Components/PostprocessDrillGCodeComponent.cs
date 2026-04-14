@@ -9,6 +9,8 @@ namespace GHAspireConnector.Components;
 
 public sealed class PostprocessDrillGCodeComponent : ReadableParamsComponentBase
 {
+    private const string DefaultPostprocessorPath = @"C:\GH_Aspire_Export\postprocessors\aspire\mi_maquina.pp";
+
     public PostprocessDrillGCodeComponent()
         : base("Postprocess Drill GCode", "DrillGCode", "Genera G-code de taladrado usando el postprocesador de Aspire y la herramienta resuelta desde el catalogo.", "GH Aspire", "CAM")
     {
@@ -19,7 +21,8 @@ public sealed class PostprocessDrillGCodeComponent : ReadableParamsComponentBase
         pManager.AddPointParameter("Drill Points", "Drill Points", "Puntos de taladrado en coordenadas de pieza.", GH_ParamAccess.list);
         pManager.AddTextParameter("Catalog Path", "Catalog Path", "Ruta al archivo grasshopper_tool_catalog.json.", GH_ParamAccess.item);
         pManager.AddTextParameter("Tool Selector", "Tool Selector", "Selector JSON de la herramienta drill.", GH_ParamAccess.item);
-        pManager.AddTextParameter("Postprocessor Path", "Postprocessor Path", "Ruta al archivo .pp de Aspire.", GH_ParamAccess.item);
+        pManager.AddTextParameter("Postprocessor Path", "Postprocessor Path", "Ruta al archivo .pp de Aspire.", GH_ParamAccess.item, DefaultPostprocessorPath);
+        pManager[3].Optional = true;
         pManager.AddNumberParameter("Start Depth", "Start Depth", "Profundidad inicial desde la cara superior del material.", GH_ParamAccess.item, 0.0);
         pManager.AddNumberParameter("Cut Depth", "Cut Depth", "Profundidad de corte relativa desde Start Depth.", GH_ParamAccess.item);
         pManager.AddNumberParameter("Safe Z", "Safe Z", "Altura segura para rapids y retract final.", GH_ParamAccess.item, 5.0);
@@ -52,12 +55,17 @@ public sealed class PostprocessDrillGCodeComponent : ReadableParamsComponentBase
         if (!da.GetDataList(0, drillPoints) || drillPoints.Count == 0) return;
         if (!da.GetData(1, ref catalogPath) || string.IsNullOrWhiteSpace(catalogPath)) return;
         if (!da.GetData(2, ref selectorJson) || string.IsNullOrWhiteSpace(selectorJson)) return;
-        if (!da.GetData(3, ref postPath) || string.IsNullOrWhiteSpace(postPath)) return;
+        da.GetData(3, ref postPath);
         if (!da.GetData(4, ref startDepth)) return;
         if (!da.GetData(5, ref cutDepth)) return;
         da.GetData(6, ref safeZ);
         da.GetData(7, ref approachZ);
         da.GetData(8, ref home);
+
+        if (string.IsNullOrWhiteSpace(postPath))
+        {
+            postPath = DefaultPostprocessorPath;
+        }
 
         Models.ToolCatalogEntry? toolEntry;
         DrillPathResult drillPath;
@@ -85,19 +93,19 @@ public sealed class PostprocessDrillGCodeComponent : ReadableParamsComponentBase
         var tokenValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["[T]"] = toolEntry.ToolNumber.ToString(CultureInfo.InvariantCulture),
-            ["[S]"] = FormatNumber(toolEntry.RpmRecommend, 0),
-            ["[F]"] = FormatNumber(toolEntry.PlungeRecommendMmPerMin, 1),
-            ["[XH]"] = FormatAxis(home.X),
-            ["[YH]"] = FormatAxis(home.Y),
-            ["[ZH]"] = FormatAxis(home.Z)
+            ["[S]"] = FormatToken("S", toolEntry.RpmRecommend, 0),
+            ["[F]"] = FormatToken("F", toolEntry.PlungeRecommendMmPerMin, 1),
+            ["[XH]"] = FormatToken("X", home.X),
+            ["[YH]"] = FormatToken("Y", home.Y),
+            ["[ZH]"] = FormatToken("Z", home.Z)
         };
 
         AppendBlock(lines, post.GetBlock("HEADER"), tokenValues);
 
         foreach (var hole in drillPath.Holes)
         {
-            tokenValues["[X]"] = FormatAxis(hole.SafePoint.X);
-            tokenValues["[Y]"] = FormatAxis(hole.SafePoint.Y);
+            tokenValues["[X]"] = FormatToken("X", hole.SafePoint.X);
+            tokenValues["[Y]"] = FormatToken("Y", hole.SafePoint.Y);
             tokenValues["[Z]"] = string.Empty;
             AppendBlock(lines, post.GetBlock("RAPID_MOVE"), tokenValues);
 
@@ -105,18 +113,18 @@ public sealed class PostprocessDrillGCodeComponent : ReadableParamsComponentBase
             {
                 tokenValues["[X]"] = string.Empty;
                 tokenValues["[Y]"] = string.Empty;
-                tokenValues["[Z]"] = FormatAxis(hole.ApproachPoint.Z);
+                tokenValues["[Z]"] = FormatToken("Z", hole.ApproachPoint.Z);
                 AppendBlock(lines, post.GetBlock("RAPID_MOVE"), tokenValues);
             }
 
             tokenValues["[X]"] = string.Empty;
             tokenValues["[Y]"] = string.Empty;
-            tokenValues["[Z]"] = FormatAxis(hole.BottomPoint.Z);
+            tokenValues["[Z]"] = FormatToken("Z", hole.BottomPoint.Z);
             AppendBlock(lines, post.GetBlock("FIRST_FEED_MOVE"), tokenValues);
 
             tokenValues["[X]"] = string.Empty;
             tokenValues["[Y]"] = string.Empty;
-            tokenValues["[Z]"] = FormatAxis(hole.SafePoint.Z);
+            tokenValues["[Z]"] = FormatToken("Z", hole.SafePoint.Z);
             AppendBlock(lines, post.GetBlock("RAPID_MOVE"), tokenValues);
         }
 
@@ -146,15 +154,15 @@ public sealed class PostprocessDrillGCodeComponent : ReadableParamsComponentBase
         }
     }
 
-    private static string FormatAxis(double value)
-    {
-        return value.ToString("0.000", CultureInfo.InvariantCulture);
-    }
-
     private static string FormatNumber(double value, int decimals)
     {
         var format = decimals <= 0 ? "0" : "0." + new string('0', decimals);
         return value.ToString(format, CultureInfo.InvariantCulture);
+    }
+
+    private static string FormatToken(string prefix, double value, int decimals = 3)
+    {
+        return prefix + FormatNumber(value, decimals);
     }
 
     protected override System.Drawing.Bitmap? Icon => IconLoader.Load("write.png");
