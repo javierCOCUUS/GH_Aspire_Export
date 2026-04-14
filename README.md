@@ -22,6 +22,7 @@ El objetivo del proyecto es definir un flujo donde Grasshopper genere la geometr
 4. El script abre un dialogo para elegir JSON, DXF y catalogo de herramientas.
 5. Lua importa el DXF, detecta la capa `STOCK`, ajusta el sheet y crea toolpaths.
 6. Las herramientas se resuelven a partir del catalogo JSON y se aplican en Aspire.
+7. Grasshopper puede elegir herramientas por tipo de operacion o por operacion individual exportando selectores en el job JSON.
 
 ## Contrato de datos actual
 
@@ -29,6 +30,7 @@ El JSON del job contiene:
 
 - `job_name`, `units`, `origin`
 - `material.thickness` y `material.z_zero`
+- `tool_defaults` opcional para defaults por `profile`, `pocket` y `drill`
 - `operations[]` con `name`, `layer`, `type`, `start_depth`, `cut_depth`
 - `operations[].tool` opcional para seleccionar una herramienta concreta del catalogo
 
@@ -65,11 +67,14 @@ Ejemplo resumido:
 
 El importador intenta resolver la herramienta por este orden:
 
-1. `operations[].tool.id`
-2. coincidencia por `tool_type`, `diameter_mm`, `tool_number` o `aspire_group`
-3. fallback interno si el catalogo no encuentra una coincidencia valida
+1. `tool_defaults.<type>` como base para cada tipo de operacion
+2. `operations[].tool` como override puntual de una operacion concreta
+3. coincidencia por `id`, `tool_type`, `diameter_mm`, `tool_number` o `aspire_group`
+4. fallback interno si el catalogo no encuentra una coincidencia valida
 
 Los avances y avances de corte del catalogo VTDB se aplican en Aspire usando los valores recomendados del JSON de herramientas.
+
+Para simplificar la lectura desde Grasshopper, el repo incluye un catalogo simplificado generado para UI y selecciones: [tools/grasshopper_tool_catalog.json](tools/grasshopper_tool_catalog.json).
 
 ## Estado actual
 

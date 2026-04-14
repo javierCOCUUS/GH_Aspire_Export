@@ -464,13 +464,41 @@ local function clone_selector(selector)
   return out
 end
 
-local function resolve_selector_for_operation(op)
-  local selector = clone_selector(DEFAULT_TOOL_SELECTORS[op.type] or {})
-  if type(op.tool) == "table" then
-    for k, v in pairs(op.tool) do
-      selector[k] = v
+local function selector_has_values(selector)
+  if selector == nil then
+    return false
+  end
+
+  for _, v in pairs(selector) do
+    if v ~= nil and trim(v) ~= "" then
+      return true
     end
   end
+
+  return false
+end
+
+local function merge_selector_values(target, source)
+  if type(source) ~= "table" then
+    return
+  end
+
+  for k, v in pairs(source) do
+    target[k] = v
+  end
+end
+
+local function resolve_selector_for_operation(job_data, op)
+  local selector = clone_selector(DEFAULT_TOOL_SELECTORS[op.type] or {})
+
+  if type(job_data) == "table" and type(job_data.tool_defaults) == "table" then
+    merge_selector_values(selector, job_data.tool_defaults[op.type])
+  end
+
+  if type(op.tool) == "table" then
+    merge_selector_values(selector, op.tool)
+  end
+
   return selector
 end
 
@@ -589,14 +617,18 @@ local function build_tool_from_database(op, tool_entry, in_mm)
   return tool, tool_name
 end
 
-local function build_tool_for_operation(op, tool_db, in_mm)
-  local selector = resolve_selector_for_operation(op)
+local function build_tool_for_operation(job_data, op, tool_db, in_mm)
+  local selector = resolve_selector_for_operation(job_data, op)
   local entry = find_tool_in_database(tool_db, selector)
   if entry ~= nil then
     local tool, tool_name_or_error = build_tool_from_database(op, entry, in_mm)
     if tool ~= nil then
       return tool, tool_name_or_error
     end
+  end
+
+  if selector_has_values(selector) then
+    return build_fallback_tool(op, in_mm)
   end
 
   return build_fallback_tool(op, in_mm)
@@ -619,6 +651,7 @@ local function parse_job_json(json_text)
       thickness = to_number(raw.material.thickness, 18.0),
       z_zero = raw.material.z_zero or "material_top"
     },
+    tool_defaults = raw.tool_defaults or {},
     operations = raw.operations
   }
 end
@@ -851,13 +884,13 @@ local function default_geometry_selector()
   return GeometrySelector()
 end
 
-local function create_profile_toolpath(job, op, in_mm, tool_db)
+local function create_profile_toolpath(job, job_data, op, in_mm, tool_db)
   local ok_sel, sel_info = select_all_objects_on_layer(job, op.layer)
   if not ok_sel then
     return false, sel_info
   end
 
-  local tool, tool_name = build_tool_for_operation(op, tool_db, in_mm)
+  local tool, tool_name = build_tool_for_operation(job_data, op, tool_db, in_mm)
 
   local profile_data = ProfileParameterData()
   profile_data.Name = op.name
@@ -912,13 +945,13 @@ local function create_profile_toolpath(job, op, in_mm, tool_db)
   return true, "OK | Tool: " .. tostring(tool_name)
 end
 
-local function create_pocket_toolpath(job, op, in_mm, tool_db)
+local function create_pocket_toolpath(job, job_data, op, in_mm, tool_db)
   local ok_sel, sel_info = select_all_objects_on_layer(job, op.layer)
   if not ok_sel then
     return false, sel_info
   end
 
-  local tool, tool_name = build_tool_for_operation(op, tool_db, in_mm)
+  local tool, tool_name = build_tool_for_operation(job_data, op, tool_db, in_mm)
 
   local pocket_data = PocketParameterData()
   pocket_data.Name = op.name
@@ -959,13 +992,13 @@ local function create_pocket_toolpath(job, op, in_mm, tool_db)
   return true, "OK | Tool: " .. tostring(tool_name)
 end
 
-local function create_drill_toolpath(job, op, in_mm, tool_db)
+local function create_drill_toolpath(job, job_data, op, in_mm, tool_db)
   local ok_sel, sel_info = select_all_objects_on_layer(job, op.layer)
   if not ok_sel then
     return false, sel_info
   end
 
-  local tool, tool_name = build_tool_for_operation(op, tool_db, in_mm)
+  local tool, tool_name = build_tool_for_operation(job_data, op, tool_db, in_mm)
 
   local drill_data = DrillParameterData()
   drill_data.Name = op.name
@@ -998,17 +1031,17 @@ local function create_drill_toolpath(job, op, in_mm, tool_db)
   return true, "OK | Tool: " .. tostring(tool_name)
 end
 
-local function create_toolpath_for_operation(job, op, in_mm, tool_db)
+local function create_toolpath_for_operation(job, job_data, op, in_mm, tool_db)
   if upper_trim(op.layer) == "STOCK" then
     return true, "STOCK ignorado"
   end
 
   if op.type == "profile" then
-    return create_profile_toolpath(job, op, in_mm, tool_db)
+    return create_profile_toolpath(job, job_data, op, in_mm, tool_db)
   elseif op.type == "pocket" then
-    return create_pocket_toolpath(job, op, in_mm, tool_db)
+    return create_pocket_toolpath(job, job_data, op, in_mm, tool_db)
   elseif op.type == "drill" then
-    return create_drill_toolpath(job, op, in_mm, tool_db)
+    return create_drill_toolpath(job, job_data, op, in_mm, tool_db)
   else
     return false, "Tipo no soportado: " .. tostring(op.type)
   end
@@ -1142,7 +1175,7 @@ function main(script_path)
     local op = data.operations[i]
 
     if upper_trim(op.layer) ~= "STOCK" then
-      local ok_tp, msg = create_toolpath_for_operation(job, op, in_mm, tool_db)
+      local ok_tp, msg = create_toolpath_for_operation(job, data, op, in_mm, tool_db)
       if ok_tp then
         created = created + 1
         table.insert(report, "[OK] " .. op.name .. " | " .. op.layer .. " | " .. op.type .. " -> " .. tostring(msg))
