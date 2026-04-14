@@ -21,7 +21,7 @@ Mover a un plugin mantenible la logica que en Python seria dificil de escalar:
 
 ## Legibilidad en Grasshopper
 
-Los nicknames de entradas y salidas se han igualado a nombres legibles para que en el canvas se vean palabras completas, no solo iniciales.
+Los nicknames de entradas y salidas se sincronizan con nombres legibles para que en el canvas se vean palabras completas, no solo iniciales, tambien al recargar instancias ya existentes.
 
 ## Build local
 

@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 
 namespace GHAspireConnector.Components;
 
-public sealed class CreateOperationComponent : GH_Component
+public sealed class CreateOperationComponent : ReadableParamsComponentBase
 {
     public CreateOperationComponent()
         : base("Create Operation JSON", "OpJson", "Construye el JSON de una operacion para Aspire.", "GH Aspire", "JSON")

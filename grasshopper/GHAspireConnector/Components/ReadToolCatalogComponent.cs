@@ -7,7 +7,7 @@ using GHAspireConnector.Models;
 
 namespace GHAspireConnector.Components;
 
-public sealed class ReadToolCatalogComponent : GH_Component
+public sealed class ReadToolCatalogComponent : ReadableParamsComponentBase
 {
     public ReadToolCatalogComponent()
         : base("Read Tool Catalog", "ToolCatalog", "Lee el catalogo simplificado de herramientas para Grasshopper.", "GH Aspire", "Tools")

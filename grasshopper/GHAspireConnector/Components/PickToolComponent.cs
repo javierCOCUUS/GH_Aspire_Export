@@ -7,7 +7,7 @@ using GHAspireConnector.Models;
 
 namespace GHAspireConnector.Components;
 
-public sealed class PickToolComponent : GH_Component
+public sealed class PickToolComponent : ReadableParamsComponentBase
 {
     public PickToolComponent()
         : base("Pick Tool", "PickTool", "Selecciona una herramienta del catalogo filtrado por operacion y devuelve su selector JSON.", "GH Aspire", "Tools")

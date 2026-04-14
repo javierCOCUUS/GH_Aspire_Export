@@ -5,7 +5,7 @@ using Grasshopper.Kernel;
 
 namespace GHAspireConnector.Components;
 
-public sealed class CreateJobJsonComponent : GH_Component
+public sealed class CreateJobJsonComponent : ReadableParamsComponentBase
 {
     public CreateJobJsonComponent()
         : base("Create Job JSON", "JobJson", "Construye el JSON completo del job para Aspire a partir de defaults y operaciones.", "GH Aspire", "JSON")

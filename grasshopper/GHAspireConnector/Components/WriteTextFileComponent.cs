@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 
 namespace GHAspireConnector.Components;
 
-public sealed class WriteTextFileComponent : GH_Component
+public sealed class WriteTextFileComponent : ReadableParamsComponentBase
 {
     public WriteTextFileComponent()
         : base("Write Text File", "WriteFile", "Escribe texto o JSON a disco para probar el flujo Grasshopper -> archivo.", "GH Aspire", "IO")
