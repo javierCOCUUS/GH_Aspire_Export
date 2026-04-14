@@ -1,0 +1,23 @@
+# OS and editor
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary and backup files
+*.bak
+*.tmp
+*.temp
+*.dxfbak
+~$*
+
+# Rhino and Aspire local artifacts
+*.3dmbak
+*.crash
+
+# Python cache if helper scripts are added later
+__pycache__/
+*.pyc
+
+# Local environment folders
+.venv/
+venv/

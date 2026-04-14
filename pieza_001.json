@@ -1,0 +1,41 @@
+{
+  "job_name": "pieza_001",
+  "units": "mm",
+  "material": {
+    "thickness": 18.0,
+    "z_zero": "material_top"
+  },
+  "origin": "lower_left",
+  "operations": [
+    {
+      "name": "CUT_INSIDE",
+      "layer": "CUT_INSIDE",
+      "type": "profile",
+      "start_depth": 0.0,
+      "cut_depth": 18.2,
+      "side": "inside"
+    },
+    {
+      "name": "POCKET",
+      "layer": "POCKET",
+      "type": "pocket",
+      "start_depth": 0.0,
+      "cut_depth": 6.0
+    },
+    {
+      "name": "DRILL",
+      "layer": "DRILL",
+      "type": "drill",
+      "start_depth": 0.0,
+      "cut_depth": 12.0
+    },
+    {
+      "name": "CUT_OUTSIDE",
+      "layer": "CUT_OUTSIDE",
+      "type": "profile",
+      "start_depth": 0.0,
+      "cut_depth": 18.2,
+      "side": "outside"
+    }
+  ]
+}
