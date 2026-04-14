@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyName>GHAspireConnector</AssemblyName>
+    <RootNamespace>GHAspireConnector</RootNamespace>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseWindowsForms>true</UseWindowsForms>
+    <TargetExt>.gha</TargetExt>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RhinoSystemDir Condition="'$(RhinoSystemDir)' == ''">C:\Program Files\Rhino 8\System</RhinoSystemDir>
+    <GrasshopperPluginDir Condition="'$(GrasshopperPluginDir)' == ''">C:\Program Files\Rhino 8\Plug-ins\Grasshopper</GrasshopperPluginDir>
+    <RhinoCommonPath>$(RhinoSystemDir)\RhinoCommon.dll</RhinoCommonPath>
+    <GrasshopperDllPath>$(GrasshopperPluginDir)\Grasshopper.dll</GrasshopperDllPath>
+    <GhIoDllPath>$(GrasshopperPluginDir)\GH_IO.dll</GhIoDllPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="RhinoCommon">
+      <HintPath>$(RhinoCommonPath)</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Grasshopper">
+      <HintPath>$(GrasshopperDllPath)</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="GH_IO">
+      <HintPath>$(GhIoDllPath)</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="ValidateRhinoReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(RhinoCommonPath)')" Text="RhinoCommon.dll no encontrado en $(RhinoCommonPath)" />
+    <Error Condition="!Exists('$(GrasshopperDllPath)')" Text="Grasshopper.dll no encontrado en $(GrasshopperDllPath)" />
+    <Error Condition="!Exists('$(GhIoDllPath)')" Text="GH_IO.dll no encontrado en $(GhIoDllPath)" />
+  </Target>
+</Project>

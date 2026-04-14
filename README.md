@@ -7,7 +7,8 @@ El objetivo del proyecto es definir un flujo donde Grasshopper genere la geometr
 ## Estructura actual
 
 - [aspire/GH_Aspire_importer.lua](aspire/GH_Aspire_importer.lua): importador principal para Aspire.
-- [grasshopper/README.md](grasshopper/README.md): carpeta reservada para definiciones GH y exportadores.
+- [grasshopper/README.md](grasshopper/README.md): entrada al trabajo de Grasshopper.
+- [grasshopper/GHAspireConnector/GHAspireConnector.csproj](grasshopper/GHAspireConnector/GHAspireConnector.csproj): base del plugin en C# para Grasshopper.
 - [samples/pieza_001/pieza_001.dxf](samples/pieza_001/pieza_001.dxf): ejemplo de geometria 2D exportada.
 - [samples/pieza_001/pieza_001.json](samples/pieza_001/pieza_001.json): ejemplo de job con operaciones y selectores de herramienta.
 - [samples/pieza_001/pieza_001.3dm](samples/pieza_001/pieza_001.3dm): geometria base asociada al ejemplo.
@@ -81,9 +82,10 @@ Para simplificar la lectura desde Grasshopper, el repo incluye un catalogo simpl
 - Ya hay seleccion interactiva de JSON y DXF en Aspire.
 - Ya se usa el catalogo de herramientas JSON para crear las herramientas.
 - Se mantienen fallbacks internos para no bloquear el flujo si una herramienta no se encuentra.
+- Ya hay una base de plugin en C# para Grasshopper, preferible a seguir creciendo con componentes Python sueltos.
 
 ## Siguientes pasos razonables
 
 1. Formalizar mejor el contrato JSON en un documento dedicado.
-2. Llevar los exportadores de Grasshopper a [grasshopper/README.md](grasshopper/README.md) y sus archivos asociados.
+2. Llevar los exportadores de Grasshopper al plugin en [grasshopper/GHAspireConnector/GHAspireConnector.csproj](grasshopper/GHAspireConnector/GHAspireConnector.csproj).
 3. Definir qué operaciones CAM 2.5D deben resolverse directamente en Grasshopper.
