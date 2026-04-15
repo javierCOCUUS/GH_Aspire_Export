@@ -1,0 +1,26 @@
+{
+  "job_name": "gh_smoke",
+  "units": "mm",
+  "origin": "lower_left",
+  "material": {
+    "thickness": 18,
+    "z_zero": "material_top"
+  },
+  "operations": [
+    {
+      "name": "CUT_TEST",
+      "layer": "CUT_TEST",
+      "type": "profile",
+      "start_depth": 0,
+      "cut_depth": 18,
+      "side": "outside",
+      "tool": {
+        "id": "g-g-a3e3a96f-def7-4da5-993b-458c8339a989",
+        "tool_type": "end_mill",
+        "diameter_mm": 1,
+        "tool_number": 1,
+        "aspire_group": "End Mills"
+      }
+    }
+  ]
+}
