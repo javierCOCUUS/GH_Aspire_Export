@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Grasshopper.Kernel;
 using GHAspireConnector.Models;

@@ -14,6 +14,23 @@ public sealed class ReadToolCatalogComponent : ReadableParamsComponentBase
     {
     }
 
+    public override void AddedToDocument(GH_Document document)
+    {
+        base.AddedToDocument(document);
+        EnsureConnectedValueList(
+            document,
+            1,
+            "Operation Type",
+            "Filtro rapido del tipo de operacion.",
+            new (string Name, string Expression)[]
+            {
+                ("All", QuoteTextExpression(string.Empty)),
+                ("profile", QuoteTextExpression("profile")),
+                ("pocket", QuoteTextExpression("pocket")),
+                ("drill", QuoteTextExpression("drill"))
+            });
+    }
+
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
         pManager.AddTextParameter("Catalog Path", "Catalog Path", "Ruta al archivo grasshopper_tool_catalog.json.", GH_ParamAccess.item);

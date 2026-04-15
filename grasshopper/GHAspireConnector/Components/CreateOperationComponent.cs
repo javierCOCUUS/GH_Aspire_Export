@@ -11,6 +11,23 @@ public sealed class CreateOperationComponent : ReadableParamsComponentBase
     {
     }
 
+    public override void AddedToDocument(GH_Document document)
+    {
+        base.AddedToDocument(document);
+        EnsureConnectedTextValueList(
+            document,
+            2,
+            "Type",
+            "Tipo de operacion.",
+            new[] { "profile", "pocket", "drill" });
+        EnsureConnectedTextValueList(
+            document,
+            5,
+            "Side",
+            "Lado de compensacion para profile.",
+            new[] { "outside", "inside" });
+    }
+
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
         pManager.AddTextParameter("Name", "Name", "Nombre de la operacion.", GH_ParamAccess.item);

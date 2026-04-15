@@ -16,7 +16,10 @@ Mover a un plugin mantenible la logica que en Python seria dificil de escalar:
 - `Read Tool Catalog`: lee [tools/grasshopper_tool_catalog.json](../../tools/grasshopper_tool_catalog.json).
 - `Pick Tool`: selecciona una herramienta filtrada y devuelve el selector JSON.
 - `Build Drill Preview`: primera operacion CAM determinista con lectura de herramienta desde catalogo y salidas separadas para rapid, approach, plunge y retract.
+- `Build Profile Preview`: previsualiza `profile` con compensacion por radio, side `inside/outside` y pasadas por `stepdown`.
+- `Build Pocket Preview`: previsualiza `pocket` con offsets interiores y pasadas por `stepdown` y `stepover`.
 - `Postprocess Drill GCode`: genera G-code de drill leyendo un postprocesador real de Aspire.
+- `Postprocess Profile GCode`: genera G-code de profile a partir de las curvas cerradas y el postprocesador de Aspire.
 - `Create Operation JSON`: genera el JSON de una operacion.
 - `Create Job JSON`: empaqueta material, defaults y operaciones en el job final.
 - `Write Text File`: escribe un JSON o texto a disco para pruebas de flujo.
@@ -39,6 +42,14 @@ Siempre que un componente permita elegir numero de herramienta, la UI debe ofrec
 La salida final debe propagar ese `tool_number` al selector JSON y el resto de componentes deben respetarlo durante preview y postprocesado.
 
 En el caso actual, `Pick Tool` crea y conecta automaticamente esa `Value List` al añadirse al canvas.
+
+## Operaciones CAM actuales
+
+- `drill`: preview determinista y postprocesado directo a G-code.
+- `profile`: preview determinista con compensacion de herramienta y postprocesado directo a G-code.
+- `pocket`: preview determinista con offsets interiores.
+
+La resolucion determinista actual esta pensada para validar geometria, alturas y herramienta en Grasshopper antes de decidir si la salida final sigue yendo a Aspire o a un postprocesado directo.
 
 ## Build local
 
@@ -72,6 +83,10 @@ El ensamblado se genera con extension `.gha`.
 ## Prueba de drill a G-code
 
 La prueba corta de postprocesado directo esta descrita en [docs/drill-gcode-smoke-test.md](../../docs/drill-gcode-smoke-test.md).
+
+## Prueba de profile a G-code
+
+La prueba corta de postprocesado directo esta descrita en [docs/profile-gcode-smoke-test.md](../../docs/profile-gcode-smoke-test.md).
 
 ## Siguiente paso recomendado
 

@@ -9,6 +9,10 @@ namespace GHAspireConnector.Components;
 
 public sealed class PickToolComponent : ReadableParamsComponentBase
 {
+    private const int OperationTypeInputIndex = 1;
+    private const int ToolIdInputIndex = 3;
+    private const int ToolNumberInputIndex = 4;
+
     public PickToolComponent()
         : base("Pick Tool", "PickTool", "Selecciona una herramienta del catalogo filtrado por operacion y devuelve su selector JSON.", "GH Aspire", "Tools")
     {
@@ -17,6 +21,8 @@ public sealed class PickToolComponent : ReadableParamsComponentBase
     public override void AddedToDocument(GH_Document document)
     {
         base.AddedToDocument(document);
+        EnsureOperationTypeValueList(document);
+        EnsureToolIdValueList(document);
         EnsureToolNumberValueList(document);
     }
 
@@ -90,6 +96,7 @@ public sealed class PickToolComponent : ReadableParamsComponentBase
         }
 
         var tools = filtered.ToList();
+        SyncToolIdValueList(tools);
         da.SetData(4, tools.Count);
 
         if (tools.Count == 0)
@@ -146,7 +153,7 @@ public sealed class PickToolComponent : ReadableParamsComponentBase
     {
         EnsureConnectedValueList(
             document,
-            4,
+            ToolNumberInputIndex,
             "Tool Number",
             "Selector rapido del numero de herramienta.",
             new (string Name, string Expression)[]
@@ -156,5 +163,55 @@ public sealed class PickToolComponent : ReadableParamsComponentBase
                 ("T2", "2"),
                 ("T3", "3")
             });
+    }
+
+    private void EnsureOperationTypeValueList(GH_Document document)
+    {
+        EnsureConnectedValueList(
+            document,
+            OperationTypeInputIndex,
+            "Operation Type",
+            "Filtro rapido del tipo de operacion.",
+            new (string Name, string Expression)[]
+            {
+                ("All", QuoteTextExpression(string.Empty)),
+                ("profile", QuoteTextExpression("profile")),
+                ("pocket", QuoteTextExpression("pocket")),
+                ("drill", QuoteTextExpression("drill"))
+            });
+    }
+
+    private void EnsureToolIdValueList(GH_Document document)
+    {
+        EnsureConnectedValueList(
+            document,
+            ToolIdInputIndex,
+            "Tool Id",
+            "Selector rapido de herramienta cargado desde el catalogo.",
+            new (string Name, string Expression)[]
+            {
+                ("By Index", QuoteTextExpression(string.Empty))
+            },
+            220,
+            10);
+    }
+
+    private void SyncToolIdValueList(IReadOnlyList<ToolCatalogEntry> tools)
+    {
+        var items = new List<(string Name, string Expression)>
+        {
+            ("By Index", QuoteTextExpression(string.Empty))
+        };
+
+        foreach (var tool in tools)
+        {
+            items.Add((tool.DisplayName, QuoteTextExpression(tool.Id)));
+        }
+
+        SyncConnectedValueListItems(
+            ToolIdInputIndex,
+            "Tool Id",
+            "Selector rapido de herramienta cargado desde el catalogo.",
+            items);
     }
 }

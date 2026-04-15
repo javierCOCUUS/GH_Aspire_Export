@@ -1,8 +1,10 @@
 using System.Drawing;
 using System.Reflection;
+using System.Runtime.Versioning;
 
 namespace GHAspireConnector;
 
+[SupportedOSPlatform("windows")]
 internal static class IconLoader
 {
     public static Bitmap? Load(string fileName)

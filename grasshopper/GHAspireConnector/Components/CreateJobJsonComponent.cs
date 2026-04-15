@@ -12,6 +12,29 @@ public sealed class CreateJobJsonComponent : ReadableParamsComponentBase
     {
     }
 
+    public override void AddedToDocument(GH_Document document)
+    {
+        base.AddedToDocument(document);
+        EnsureConnectedTextValueList(
+            document,
+            1,
+            "Units",
+            "Unidades del job.",
+            new[] { "mm", "in" });
+        EnsureConnectedTextValueList(
+            document,
+            3,
+            "Origin",
+            "Origen XY del job.",
+            new[] { "lower_left", "BOTTOM_LEFT", "BOTTOM_RIGHT", "TOP_RIGHT", "TOP_LEFT", "CENTER" });
+        EnsureConnectedTextValueList(
+            document,
+            4,
+            "Z Zero",
+            "Referencia Z del material.",
+            new[] { "material_top", "material_bottom" });
+    }
+
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
         pManager.AddTextParameter("Job Name", "Job Name", "Nombre del job.", GH_ParamAccess.item);
