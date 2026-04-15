@@ -1,5 +1,8 @@
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Special;
 using GH_IO.Serialization;
+using System.Collections.Generic;
+using System.Drawing;
 
 namespace GHAspireConnector;
 
@@ -37,5 +40,48 @@ public abstract class ReadableParamsComponentBase : GH_Component
             param.NickName = param.Name;
             param.MutableNickName = false;
         }
+    }
+
+    protected void EnsureConnectedValueList(
+        GH_Document document,
+        int inputIndex,
+        string listName,
+        string listDescription,
+        IReadOnlyList<(string Name, string Expression)> items,
+        int xOffset = 140,
+        int yOffset = 10)
+    {
+        if (Params.Input.Count <= inputIndex)
+        {
+            return;
+        }
+
+        var input = Params.Input[inputIndex];
+        if (input.SourceCount > 0 || input.Attributes is null)
+        {
+            return;
+        }
+
+        var valueList = new GH_ValueList
+        {
+            Name = listName,
+            NickName = listName,
+            Description = listDescription,
+            ListMode = GH_ValueListMode.DropDown
+        };
+
+        valueList.CreateAttributes();
+        valueList.ListItems.Clear();
+        foreach (var item in items)
+        {
+            valueList.ListItems.Add(new GH_ValueListItem(item.Name, item.Expression));
+        }
+
+        var pivot = input.Attributes.Pivot;
+        valueList.Attributes.Pivot = new PointF(pivot.X - xOffset, pivot.Y - yOffset);
+
+        document.AddObject(valueList, false);
+        input.AddSource(valueList);
+        valueList.ExpireSolution(true);
     }
 }

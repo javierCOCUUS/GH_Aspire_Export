@@ -44,10 +44,12 @@ internal static class ToolCatalogResolver
         var id = selector["id"]?.GetValue<string>();
         if (!string.IsNullOrWhiteSpace(id))
         {
-            var byId = tools.FirstOrDefault(tool => tool.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+            var byId = tools.FirstOrDefault(tool =>
+                tool.Id.Equals(id, StringComparison.OrdinalIgnoreCase) &&
+                MatchesStaticSelectorFields(tool, selector));
             if (byId is not null)
             {
-                return byId;
+                return ApplySelectorOverrides(byId, selector);
             }
         }
 
@@ -56,10 +58,58 @@ internal static class ToolCatalogResolver
         var diameter = selector["diameter_mm"]?.GetValue<double>();
         var toolNumber = selector["tool_number"]?.GetValue<int>();
 
-        return tools.FirstOrDefault(tool =>
+        var resolved = tools.FirstOrDefault(tool =>
             (string.IsNullOrWhiteSpace(toolType) || tool.ToolType.Equals(toolType, StringComparison.OrdinalIgnoreCase)) &&
             (string.IsNullOrWhiteSpace(aspireGroup) || tool.AspireGroup.Equals(aspireGroup, StringComparison.OrdinalIgnoreCase)) &&
-            (!diameter.HasValue || Math.Abs(tool.DiameterMm - diameter.Value) < 0.001) &&
-            (!toolNumber.HasValue || tool.ToolNumber == toolNumber.Value));
+            (!diameter.HasValue || Math.Abs(tool.DiameterMm - diameter.Value) < 0.001));
+
+        return resolved is null ? null : ApplySelectorOverrides(resolved, selector);
+    }
+
+    private static bool MatchesStaticSelectorFields(ToolCatalogEntry tool, JsonObject selector)
+    {
+        var toolType = selector["tool_type"]?.GetValue<string>();
+        var aspireGroup = selector["aspire_group"]?.GetValue<string>();
+        var diameter = selector["diameter_mm"]?.GetValue<double>();
+
+        return (string.IsNullOrWhiteSpace(toolType) || tool.ToolType.Equals(toolType, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(aspireGroup) || tool.AspireGroup.Equals(aspireGroup, StringComparison.OrdinalIgnoreCase)) &&
+            (!diameter.HasValue || Math.Abs(tool.DiameterMm - diameter.Value) < 0.001);
+    }
+
+    private static ToolCatalogEntry ApplySelectorOverrides(ToolCatalogEntry tool, JsonObject selector)
+    {
+        var toolNumber = selector["tool_number"]?.GetValue<int>();
+        if (!toolNumber.HasValue || toolNumber.Value <= 0 || toolNumber.Value == tool.ToolNumber)
+        {
+            return tool;
+        }
+
+        var selectorOverride = new ToolSelector
+        {
+            Id = tool.Selector.Id,
+            ToolType = tool.Selector.ToolType,
+            DiameterMm = tool.Selector.DiameterMm,
+            ToolNumber = toolNumber.Value,
+            AspireGroup = tool.Selector.AspireGroup
+        };
+
+        return new ToolCatalogEntry
+        {
+            Id = tool.Id,
+            DisplayName = tool.DisplayName,
+            ToolType = tool.ToolType,
+            AspireGroup = tool.AspireGroup,
+            DiameterMm = tool.DiameterMm,
+            ToolNumber = toolNumber.Value,
+            FluteCount = tool.FluteCount,
+            StepdownMm = tool.StepdownMm,
+            StepoverMm = tool.StepoverMm,
+            RpmRecommend = tool.RpmRecommend,
+            FeedRecommendMmPerMin = tool.FeedRecommendMmPerMin,
+            PlungeRecommendMmPerMin = tool.PlungeRecommendMmPerMin,
+            OperationTypes = tool.OperationTypes.ToList(),
+            Selector = selectorOverride
+        };
     }
 }

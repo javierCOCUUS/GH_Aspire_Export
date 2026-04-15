@@ -100,35 +100,49 @@ public sealed class PostprocessDrillGCodeComponent : ReadableParamsComponentBase
             ["[ZH]"] = FormatToken("Z", home.Z)
         };
 
-        AppendBlock(lines, post.GetBlock("HEADER"), tokenValues);
+        AppendBlock(lines, post.GetBlock("HEADER"), tokenValues, toolEntry.ToolNumber);
+
+        var currentZ = home.Z;
 
         foreach (var hole in drillPath.Holes)
         {
             tokenValues["[X]"] = FormatToken("X", hole.SafePoint.X);
             tokenValues["[Y]"] = FormatToken("Y", hole.SafePoint.Y);
             tokenValues["[Z]"] = string.Empty;
-            AppendBlock(lines, post.GetBlock("RAPID_MOVE"), tokenValues);
+            AppendBlock(lines, post.GetBlock("RAPID_MOVE"), tokenValues, toolEntry.ToolNumber);
+
+            if (Math.Abs(currentZ - hole.SafePoint.Z) > Rhino.RhinoMath.ZeroTolerance)
+            {
+                tokenValues["[X]"] = string.Empty;
+                tokenValues["[Y]"] = string.Empty;
+                tokenValues["[Z]"] = FormatToken("Z", hole.SafePoint.Z);
+                AppendBlock(lines, post.GetBlock("RAPID_MOVE"), tokenValues, toolEntry.ToolNumber);
+                currentZ = hole.SafePoint.Z;
+            }
 
             if (Math.Abs(hole.SafePoint.Z - hole.ApproachPoint.Z) > Rhino.RhinoMath.ZeroTolerance)
             {
                 tokenValues["[X]"] = string.Empty;
                 tokenValues["[Y]"] = string.Empty;
                 tokenValues["[Z]"] = FormatToken("Z", hole.ApproachPoint.Z);
-                AppendBlock(lines, post.GetBlock("RAPID_MOVE"), tokenValues);
+                AppendBlock(lines, post.GetBlock("RAPID_MOVE"), tokenValues, toolEntry.ToolNumber);
+                currentZ = hole.ApproachPoint.Z;
             }
 
             tokenValues["[X]"] = string.Empty;
             tokenValues["[Y]"] = string.Empty;
             tokenValues["[Z]"] = FormatToken("Z", hole.BottomPoint.Z);
-            AppendBlock(lines, post.GetBlock("FIRST_FEED_MOVE"), tokenValues);
+            AppendBlock(lines, post.GetBlock("FIRST_FEED_MOVE"), tokenValues, toolEntry.ToolNumber);
+            currentZ = hole.BottomPoint.Z;
 
             tokenValues["[X]"] = string.Empty;
             tokenValues["[Y]"] = string.Empty;
             tokenValues["[Z]"] = FormatToken("Z", hole.SafePoint.Z);
-            AppendBlock(lines, post.GetBlock("RAPID_MOVE"), tokenValues);
+            AppendBlock(lines, post.GetBlock("RAPID_MOVE"), tokenValues, toolEntry.ToolNumber);
+            currentZ = hole.SafePoint.Z;
         }
 
-        AppendBlock(lines, post.GetBlock("FOOTER"), tokenValues);
+        AppendBlock(lines, post.GetBlock("FOOTER"), tokenValues, toolEntry.ToolNumber);
 
         da.SetData(0, post.PostName);
         da.SetData(1, post.FileExtension);
@@ -137,10 +151,20 @@ public sealed class PostprocessDrillGCodeComponent : ReadableParamsComponentBase
         da.SetData(4, string.Join(Environment.NewLine, lines));
     }
 
-    private static void AppendBlock(List<string> output, IReadOnlyList<string> block, Dictionary<string, string> tokens)
+    private static void AppendBlock(List<string> output, IReadOnlyList<string> block, Dictionary<string, string> tokens, int toolNumber)
     {
         foreach (var rawLine in block)
         {
+            if (rawLine.Contains("WCS by M6Start", StringComparison.OrdinalIgnoreCase))
+            {
+                var workOffsetCode = GetWorkOffsetCode(toolNumber);
+                if (!string.IsNullOrWhiteSpace(workOffsetCode))
+                {
+                    output.Add(workOffsetCode);
+                }
+                continue;
+            }
+
             var line = rawLine;
             foreach (var token in tokens.OrderByDescending(item => item.Key.Length))
             {
@@ -163,6 +187,17 @@ public sealed class PostprocessDrillGCodeComponent : ReadableParamsComponentBase
     private static string FormatToken(string prefix, double value, int decimals = 3)
     {
         return prefix + FormatNumber(value, decimals);
+    }
+
+    private static string GetWorkOffsetCode(int toolNumber)
+    {
+        return toolNumber switch
+        {
+            1 => "G54",
+            2 => "G55",
+            3 => "G56",
+            _ => "G54"
+        };
     }
 
     protected override System.Drawing.Bitmap? Icon => IconLoader.Load("write.png");

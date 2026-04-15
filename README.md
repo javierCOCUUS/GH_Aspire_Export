@@ -83,6 +83,11 @@ Para simplificar la lectura desde Grasshopper, el repo incluye un catalogo simpl
 - Ya se usa el catalogo de herramientas JSON para crear las herramientas.
 - Se mantienen fallbacks internos para no bloquear el flujo si una herramienta no se encuentra.
 - Ya hay una base de plugin en C# para Grasshopper, preferible a seguir creciendo con componentes Python sueltos.
+- Cuando un componente de Grasshopper necesita elegir numero de herramienta, la UI debe exponer una `Value List` tipo `Catalog`, `T1`, `T2`, `T3` en lugar de pedir enteros libres.
+
+## Validacion de drill a G-code
+
+El flujo recomendado para validar el postprocesado directo de `drill` esta descrito en [docs/drill-gcode-smoke-test.md](docs/drill-gcode-smoke-test.md).
 
 ## Siguientes pasos razonables
 

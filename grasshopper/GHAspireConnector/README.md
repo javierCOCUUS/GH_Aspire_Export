@@ -27,6 +27,19 @@ Los iconos del plugin se toman de [grasshopper/icons](../icons).
 
 Los nicknames de entradas y salidas se sincronizan con nombres legibles para que en el canvas se vean palabras completas, no solo iniciales, tambien al recargar instancias ya existentes.
 
+## Convencion de seleccion de herramienta
+
+Siempre que un componente permita elegir numero de herramienta, la UI debe ofrecer una `Value List` con estas opciones:
+
+- `Catalog`
+- `T1`
+- `T2`
+- `T3`
+
+La salida final debe propagar ese `tool_number` al selector JSON y el resto de componentes deben respetarlo durante preview y postprocesado.
+
+En el caso actual, `Pick Tool` crea y conecta automaticamente esa `Value List` al añadirse al canvas.
+
 ## Build local
 
 El proyecto referencia Rhino 8 y Grasshopper desde rutas tipicas de Windows:
@@ -55,6 +68,10 @@ El ensamblado se genera con extension `.gha`.
 3. Generar una o varias operaciones con `Create Operation JSON`.
 4. Empaquetarlas con `Create Job JSON`.
 5. Escribir el resultado con `Write Text File` a un `.json`.
+
+## Prueba de drill a G-code
+
+La prueba corta de postprocesado directo esta descrita en [docs/drill-gcode-smoke-test.md](../../docs/drill-gcode-smoke-test.md).
 
 ## Siguiente paso recomendado
 

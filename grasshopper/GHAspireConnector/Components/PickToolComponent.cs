@@ -14,6 +14,12 @@ public sealed class PickToolComponent : ReadableParamsComponentBase
     {
     }
 
+    public override void AddedToDocument(GH_Document document)
+    {
+        base.AddedToDocument(document);
+        EnsureToolNumberValueList(document);
+    }
+
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
         pManager.AddTextParameter("Catalog Path", "Catalog Path", "Ruta al archivo grasshopper_tool_catalog.json.", GH_ParamAccess.item);
@@ -22,6 +28,8 @@ public sealed class PickToolComponent : ReadableParamsComponentBase
         pManager.AddIntegerParameter("Index", "Index", "Indice dentro de la lista filtrada. Se usa si Tool Id esta vacio.", GH_ParamAccess.item, 0);
         pManager.AddTextParameter("Tool Id", "Tool Id", "Id opcional de la herramienta a seleccionar directamente.", GH_ParamAccess.item, string.Empty);
         pManager[3].Optional = true;
+        pManager.AddIntegerParameter("Tool Number", "Tool Number", "Numero de herramienta a escribir en el selector JSON. Usa 0 para conservar el numero del catalogo.", GH_ParamAccess.item, 0);
+        pManager[4].Optional = true;
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -39,6 +47,7 @@ public sealed class PickToolComponent : ReadableParamsComponentBase
         string operationType = string.Empty;
         int index = 0;
         string toolId = string.Empty;
+        int toolNumber = 0;
 
         if (!da.GetData(0, ref path) || string.IsNullOrWhiteSpace(path))
         {
@@ -48,6 +57,7 @@ public sealed class PickToolComponent : ReadableParamsComponentBase
         da.GetData(1, ref operationType);
         da.GetData(2, ref index);
         da.GetData(3, ref toolId);
+        da.GetData(4, ref toolNumber);
 
         if (!File.Exists(path))
         {
@@ -109,13 +119,42 @@ public sealed class PickToolComponent : ReadableParamsComponentBase
             selected = tools[index];
         }
 
+        var selector = selected.Selector;
+        if (toolNumber > 0)
+        {
+            selector = new ToolSelector
+            {
+                Id = selected.Selector.Id,
+                ToolType = selected.Selector.ToolType,
+                DiameterMm = selected.Selector.DiameterMm,
+                ToolNumber = toolNumber,
+                AspireGroup = selected.Selector.AspireGroup
+            };
+        }
+
         da.SetData(0, selected.DisplayName);
         da.SetData(1, selected.Id);
-        da.SetData(2, JsonHelpers.ToPrettyJson(selected.Selector.ToJsonObject()));
+        da.SetData(2, JsonHelpers.ToPrettyJson(selector.ToJsonObject()));
         da.SetData(3, JsonSerializer.Serialize(selected, JsonHelpers.PrettyOptions));
     }
 
     protected override System.Drawing.Bitmap? Icon => IconLoader.Load("opciones.png");
 
     public override Guid ComponentGuid => new("e4b595ef-1850-48be-b380-75f86d24f765");
+
+    private void EnsureToolNumberValueList(GH_Document document)
+    {
+        EnsureConnectedValueList(
+            document,
+            4,
+            "Tool Number",
+            "Selector rapido del numero de herramienta.",
+            new (string Name, string Expression)[]
+            {
+                ("Catalog", "0"),
+                ("T1", "1"),
+                ("T2", "2"),
+                ("T3", "3")
+            });
+    }
 }
